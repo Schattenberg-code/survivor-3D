@@ -1,5 +1,5 @@
 export function createWeaponDefinitions({
-  getStats, getEnemies, getPlayer, getProjectiles, d2, hit, near, rndE, aim, ring, getHeight
+  getStats, getEnemies, getPlayer, d2, hit, near, rndE, aim, getHeight, visuals
 }) {
   return {
     sword: {
@@ -9,9 +9,9 @@ export function createWeaponDefinitions({
         const player = getPlayer();
         const radius = 3.5 * getStats().ar * (1 + .12 * w.lv);
         for (const enemy of getEnemies()) {
-          if (d2(enemy, player.x, player.z) < (radius + enemy.r) ** 2) hit(enemy, 12 + 6 * w.lv);
+          if (d2(enemy, player.x, player.z) < (radius + enemy.r) ** 2) hit(enemy, 12 + 6 * w.lv, 0xc8d9e8);
         }
-        ring(player.x, player.z, radius, 0xffffff);
+        visuals.sword(player.x, player.z, radius);
       }
     },
     fire: {
@@ -35,13 +35,7 @@ export function createWeaponDefinitions({
           if (!enemy) break;
           hit(enemy, 14 + 6 * w.lv, 0xffee55);
           const groundY = getHeight(enemy.x, enemy.z);
-          const projectiles = getProjectiles();
-          for (let k = 0; k < 8; k++) {
-            projectiles.push({
-              x: enemy.x, y: groundY + k * 1.1, z: enemy.z,
-              vx: 0, vy: 0, vz: 0, l: .2, c: 0xffee55, s: 1.5
-            });
-          }
+          visuals.lightning(enemy.x, enemy.z, groundY, 0xffee55);
         }
       }
     },
@@ -67,8 +61,7 @@ export function createWeaponDefinitions({
         for (const enemy of getEnemies()) {
           if (d2(enemy, player.x, player.z) < (radius + enemy.r) ** 2) hit(enemy, 25 + 10 * w.lv, 0xff9a3c);
         }
-        ring(player.x, player.z, radius, 0xff9a3c);
-        ring(player.x, player.z, radius * .6, 0xffd27a);
+        visuals.burst(player.x, player.z, radius, 0xff9a3c, 12);
       }
     }
   };

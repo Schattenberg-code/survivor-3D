@@ -40,7 +40,7 @@ const tIdx=new Uint16Array(T_N*T_N*6);
  tGeo.setAttribute('position',new T.BufferAttribute(tPos,3));
  tGeo.setAttribute('color',new T.BufferAttribute(tCol,3));
 }
-const gm=new T.MeshLambertMaterial({color:0xffffff,vertexColors:true,flatShading:true});
+const gm=new T.MeshLambertMaterial({color:0xffffff,vertexColors:true});
 const gnd=new T.Mesh(tGeo,gm);gnd.frustumCulled=false;sc.add(gnd);
 sc.fog=new T.Fog(0x69736f,5,58);sc.background=new T.Color(0x69736f);
 
@@ -75,4 +75,3 @@ function updateTerrain(px,pz,forceCol){
 }
  return {smoothstep,getHeight,getTerrainNormal,updateTerrain,cg,cs,cd};
 }
-

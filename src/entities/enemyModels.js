@@ -2,7 +2,7 @@
  const UP=new T.Vector3(0,1,0),M4=new T.Matrix4(),Q=new T.Quaternion(),S=new T.Vector3(),C=new T.Color();
  function done(m,n){m.count=n;m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true}
 const MAX_EN=480;
-const enFlatMat=()=>new T.MeshLambertMaterial({flatShading:true});
+const enFlatMat=()=>new T.MeshLambertMaterial();
 const enGlowMat=()=>new T.MeshBasicMaterial({fog:false});
 
 const gEnOcta=flatGeo(new T.OctahedronGeometry(1,0));
@@ -417,4 +417,3 @@ function renderGolem(i,x,ey,z,sz,fa,ph,ts,hitFlash,atk,dieP){
  }
  return {max:MAX_EN,renderRaven,renderSpider,renderGolem,finish};
 }
-

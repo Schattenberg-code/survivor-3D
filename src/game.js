@@ -1,6 +1,7 @@
 ﻿import { WN, REG, TY, CH, UPG } from './data/catalog.js';
 import { createTerrain } from './world/terrain.js';
 import { createEffects } from './effects/particles.js';
+import { createCombatVisuals } from './effects/combatVisuals.js';
 import { createChestFactory } from './models/chest.js';
 import { createCharacterPreview } from './models/characterPreview.js';
 import { createFirstPersonHand } from './models/firstPersonHand.js';
@@ -40,6 +41,7 @@ const UP=new T.Vector3(0,1,0),M4=new T.Matrix4(),Q=new T.Quaternion(),Q2=new T.Q
 function inst(g,n,mat){const m=new T.InstancedMesh(g,mat||new T.MeshLambertMaterial(),n);m.setColorAt(0,C.set(1,1,1));m.frustumCulled=false;m.count=0;sc.add(m);return m}
 function flatGeo(g){return g.index?g.toNonIndexed():g}
 function put(m,i,x,y,z,sx,sy,sz,c,ry){Q.setFromAxisAngle(UP,ry||0);M4.compose(V.set(x,y,z),Q,S.set(sx,sy,sz));m.setMatrixAt(i,M4);if(c!==undefined)m.setColorAt(i,C.set(c))}
+function putAlong(m,i,x,y,z,sx,sy,sz,c,vx,vy,vz){Q2.setFromUnitVectors(UP,NRM.set(vx,vy,vz).normalize());M4.compose(V.set(x,y,z),Q2,S.set(sx,sy,sz));m.setMatrixAt(i,M4);if(c!==undefined)m.setColorAt(i,C.set(c))}
 function putTilted(m,i,x,y,z,sx,sy,sz,c,ry,tilt){Q.setFromAxisAngle(UP,ry||0);if(tilt){getTerrainNormal(x,z,NRM);Q2.setFromUnitVectors(UP,NRM);Q.premultiply(Q2)}M4.compose(V.set(x,y,z),Q,S.set(sx,sy,sz));m.setMatrixAt(i,M4);if(c!==undefined)m.setColorAt(i,C.set(c))}
 function done(m,n){m.count=n;m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true}
 const enGeo=[new T.IcosahedronGeometry(1,1),new T.ConeGeometry(.75,2.1,5),new T.TetrahedronGeometry(1,1),new T.DodecahedronGeometry(1,0),new T.IcosahedronGeometry(1,2)];const enM=enGeo.map(g=>inst(g,480));
@@ -50,8 +52,8 @@ let corpses=[];
 
 const dragonModels=createDragonModel({T,inst,flatGeo,getHeight,smoothstep,fx:(...args)=>fx(...args),random:R,getPlayer:()=>P,isPlaying:()=>state==='play'});
 const gemM=inst(new T.OctahedronGeometry(.3,0),620),
- prM=inst(new T.IcosahedronGeometry(.3,0),200),paM=inst(new T.TetrahedronGeometry(.2,0),420),
- orbM=inst(new T.IcosahedronGeometry(.5,0),14),dcM=inst(new T.ConeGeometry(1,3.2,5),150);
+ prM=inst(new T.IcosahedronGeometry(.3,0),200),arrowM=inst(new T.ConeGeometry(.075,.82,4),200),paM=inst(new T.TetrahedronGeometry(.2,0),420),
+ orbM=inst(new T.OctahedronGeometry(.42,0),14),dcM=inst(new T.ConeGeometry(1,3.2,5),150);
 const dec=[];for(let i=0;i<150;i++)dec.push({x:R(-70,70),z:R(-70,70),s:R(.7,1.8),k:Math.random()});
 
 const treeData=[];
@@ -114,7 +116,8 @@ const keys={};
 const {addXp}=createProgression(()=>st,()=>pend++);
 
 function banner(s){const b=$('bn');b.textContent=s;b.hidden=false;clearTimeout(bt);bt=setTimeout(()=>b.hidden=true,2600)}
-const {fx,ring}=createEffects({getParticles:()=>pa,getHeight,random:R});
+const {fx}=createEffects({getParticles:()=>pa,random:R});
+const combatVisuals=createCombatVisuals(T,sc,getHeight);
 const entitySystem=createEntitySystem({
  get st(){return st},get P(){return P},get en(){return en},get gems(){return gems},get pr(){return pr},get corpses(){return corpses},
  get kills(){return kills},set kills(value){kills=value},get bossN(){return bossN},set bossN(value){bossN=value},
@@ -124,8 +127,8 @@ const entitySystem=createEntitySystem({
 });
 const {d2,near,rndE,hit,kill,aim,addW,mkChest,spawn,pickType}=entitySystem;
 const WD=createWeaponDefinitions({
- getStats:()=>st,getEnemies:()=>en,getPlayer:()=>P,getProjectiles:()=>pr,
- d2,hit,near,rndE,aim,ring,getHeight
+ getStats:()=>st,getEnemies:()=>en,getPlayer:()=>P,
+ d2,hit,near,rndE,aim,getHeight,visuals:combatVisuals
 });
 function genOpts(){const pool=[];
  for(const s of SD){
@@ -152,7 +155,7 @@ function begin(){const c=CH[sel];
  st={hp:100+save.hp*10,max:100+save.hp*10,spd:1+save.spd*.03,dmg:1+save.dmg*.05,as:1,ar:1,luck:0,mag:1,rg:0,lvl:1,xp:0,need:6};
  for(const e of ch)sc.remove(e.m);
  P={x:0,z:0};en=[];corpses=[];gems=[];pr=[];pa=[];ch=[];wp={};t=0;kills=0;sp=0;nextBoss=60;chestT=10;inv=0;boss=null;bossN=0;earned=0;rIdx=-1;pend=0;burstT=30;orbT=0;
- bodyM.color.set(c.c);resetHand();hOrb=0;addW(c.w);
+ bodyM.color.set(c.c);resetHand();combatVisuals.reset();hOrb=0;addW(c.w);
  $('menu').hidden=$('over').hidden=$('pause').hidden=true;$('hud').hidden=false;state='play';lock()}
 
 function die(){state='over';document.exitPointerLock&&document.exitPointerLock();
@@ -198,6 +201,7 @@ $('opts').onclick=e=>{const b=e.target.closest('button');if(!b)return;curOpts[+b
 
 // ---------- atualização ----------
 function upd(dt){
+ combatVisuals.update(dt,state==='play');
  t+=dt;const ri=Math.floor(t/90)%5;if(ri!=rIdx){rIdx=ri;banner(REG[ri].n)}
  let ix=(keys.KeyD?1:0)-(keys.KeyA?1:0),iz=(keys.KeyW?1:0)-(keys.KeyS?1:0);
  if(ix||iz){const l=Math.hypot(ix,iz);ix/=l;iz/=l;
@@ -220,8 +224,8 @@ function upd(dt){
  for(const p of pr){p.x+=p.vx*dt;p.z+=p.vz*dt;p.y=Math.max(p.y+p.vy*dt,getHeight(p.x,p.z)+.45);p.l-=dt;
   for(const e of en){if(e.dead||p.p<=0)continue;if(d2(e,p.x,p.z)<(e.r+.5)**2&&!p.hs.has(e)){
    p.hs.add(e);
-   if(p.k=='f'){const Rr=3*st.ar;for(const o of en)if(d2(o,p.x,p.z)<(Rr+o.r)**2)hit(o,p.d,0xff8a2a);ring(p.x,p.z,Rr,0xff8a2a);p.p=0;p.l=0}
-   else{hit(e,p.d,0x9be86b);p.p--}}}
+   if(p.k=='f'){const Rr=3*st.ar;for(const o of en)if(d2(o,p.x,p.z)<(Rr+o.r)**2)hit(o,p.d,0xff8a2a);combatVisuals.burst(p.x,p.z,Rr,0xff8a2a,8);p.p=0;p.l=0}
+   else{hit(e,p.d,0xcbe8f6);p.p--}}}
   if(p.p<=0)p.l=0}
  pr=pr.filter(p=>p.l>0);
  inv-=dt;
@@ -239,7 +243,7 @@ function upd(dt){
   }
   if(e.ty===0){e.fly=(e.fly||0)+dt*7.5;e.y=getHeight(e.x,e.z)+1.25+Math.sin(e.fly+e.ph)*.16;}
   if(d<e.r+.7&&inv<=0){inv=.5;st.hp-=e.dmg;vig=1}
-  if(e.ty==4){e.bs-=dt;if(e.bs<=0){e.bs=4;ring(e.x,e.z,10,0x3be8ff);ring(e.x,e.z,6,0x1e90ff);if(d<9&&inv<=0){inv=.5;st.hp-=20;vig=1}}}}
+  if(e.ty==4){e.bs-=dt;if(e.bs<=0){e.bs=4;combatVisuals.burst(e.x,e.z,10,0x3be8ff,8);combatVisuals.burst(e.x,e.z,6,0x1e90ff,8);if(d<9&&inv<=0){inv=.5;st.hp-=20;vig=1}}}}
  en=en.filter(e=>!e.dead);if(boss&&boss.dead)boss=null;
  const mr=4*st.mag;
  for(let i=gems.length-1;i>=0;i--){const g=gems[i],dx=P.x-g.x,dz=P.z-g.z,d=Math.hypot(dx,dz);
@@ -342,9 +346,10 @@ function draw(dt,now){
  enemyModels.finish(ravenCount,spiderCount,golemCount);
  dragonModels.finish(dragonCount);
  n=0;for(const g of gems)put(gemM,n++,g.x,getHeight(g.x,g.z)+.6+Math.sin(ts*4+g.x)*.1,g.z,1,1.4,1,0x38c6f4,ts*2);done(gemM,n);
- n=0;for(const p of pr)put(prM,n++,p.x,p.y,p.z,p.k=='f'?1.6:.7,p.k=='f'?1.6:.7,p.k=='f'?1.6:1.8,p.k=='f'?0xff7a1a:0xd6f5a0);done(prM,n);
+ n=0;let an=0;for(const p of pr){if(p.k==='f')put(prM,n++,p.x,p.y,p.z,1.35,1.35,1.35,0xff7a1a);else if(an<200)putAlong(arrowM,an++,p.x,p.y,p.z,.7,1,.7,0xcbe8f6,p.vx,p.vy,p.vz)}done(prM,n);done(arrowM,an);
  n=0;for(const p of pa)put(paM,n++,p.x,p.y,p.z,p.s,p.s,p.s,p.c,p.l*5);done(paM,n);
- n=0;if(wp.orb&&state!='menu'){const k=Math.max(2,wp.orb.lv+1);for(let i=0;i<k;i++){const a=oa+i*6.283/k,ox=P.x+Math.cos(a)*3.5*st.ar,oz=P.z+Math.sin(a)*3.5*st.ar;put(orbM,n++,ox,getHeight(ox,oz)+1.1,oz,1,1,1,0xc58bff)}}done(orbM,n);
+ combatVisuals.render(pr);
+ n=0;if(wp.orb&&state!='menu'){const k=Math.max(2,wp.orb.lv+1);for(let i=0;i<k;i++){const a=oa+i*6.283/k,ox=P.x+Math.cos(a)*3.5*st.ar,oz=P.z+Math.sin(a)*3.5*st.ar,pulse=1+Math.sin(ts*4+i)*.12;put(orbM,n++,ox,getHeight(ox,oz)+1.1,oz,pulse,pulse,pulse,0xc58bff,ts*1.8+i)}}done(orbM,n);
  for(const c of ch){c.m.rotation.y=Math.sin(ts*.8+c.phase)*.055;c.m.position.y=getHeight(c.x,c.z)+.06+Math.sin(ts*2.4+c.phase)*.045}
  vig=Math.max(0,vig-dt*2.5);$('vig').style.opacity=vig*.8;
  rn.render(sc,cam)}
@@ -352,7 +357,4 @@ function draw(dt,now){
 let last=performance.now();
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;if(state=='play')upd(dt);draw(dt,now)}
 menu();requestAnimationFrame(loop);
-
-
-
 

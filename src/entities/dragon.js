@@ -5,8 +5,8 @@
  function put(m,i,x,y,z,sx,sy,sz,c,ry){Q.setFromAxisAngle(UP,ry||0);M4.compose(V.set(x,y,z),Q,S.set(sx,sy,sz));m.setMatrixAt(i,M4);if(c!==undefined)m.setColorAt(i,C.set(c))}
 // ---------- DRAGÃO ANCESTRAL FANTASMA (LOW-POLY ARTICULADO) ----------
 const MAX_D=16;
-const dScaleMat=()=>new T.MeshLambertMaterial({flatShading:true});
-const dMemMat=()=>new T.MeshLambertMaterial({flatShading:true,side:T.DoubleSide,transparent:true,opacity:.92});
+const dScaleMat=()=>new T.MeshLambertMaterial();
+const dMemMat=()=>new T.MeshLambertMaterial({side:T.DoubleSide,transparent:true,opacity:.92});
 const dGlowMat=()=>new T.MeshBasicMaterial({fog:false});
 const dMistMat=()=>new T.MeshBasicMaterial({transparent:true,opacity:.36,depthWrite:false});
 
@@ -78,6 +78,7 @@ function putDSail(m,i,p0,p1,p2,thick,c){
 }
  function renderDragon(e,i,dt,ts){
   const playerPosition=getPlayer();
+  const ey=getHeight(e.x,e.z);
 if(e.roarT===undefined){
     e.roarT=1.25;e.flyBlend=0;e.biteBlend=0;e.partT=0;
     e.animT=e.ph;e.wingPhase=e.ph;e.walkPhase=e.ph;
@@ -412,4 +413,3 @@ if(e.roarT===undefined){
  }
  return {max:MAX_D,render:renderDragon,finish};
 }
-
