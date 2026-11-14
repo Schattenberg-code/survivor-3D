@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Survivor 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"></head><body>
+<canvas id="c"></canvas>
+<div id="hud" hidden>
+ <div id="crosshair" aria-hidden="true"></div>
+ <div id="tl"><div class="bar"><i id="hp"></i><b id="hpt"></b></div><div id="wps"></div></div>
+ <div id="tc"><span id="tm">00:00</span><small id="rg"></small></div>
+ <div id="tr">
+  <div class="tr-main"><span class="ico" id="hudKillIco"></span><span id="kl">0</span></div>
+  <small>Q · Atrair XP</small>
+ </div>
+ <div id="boss" hidden><span id="bnm"></span><div class="bar"><i id="bh"></i></div></div>
+ <div id="xpb"><i id="xp"></i><span id="lv"></span></div>
+ <div id="bn" hidden></div>
+ <div id="vig"></div>
+</div>
+<div id="menu" class="ov">
+ <div class="menu-panel">
+  <div class="menu-top">
+   <span class="menu-label">Preparação</span>
+   <div class="souls-pill" title="Almas acumuladas"><span class="ico" id="menuSoulIco"></span><b id="sl">0</b></div>
+  </div>
+  <div class="char-preview">
+   <canvas id="charCanvas" width="340" height="176"></canvas>
+   <div class="char-preview-meta">
+    <span class="char-preview-tag" id="charTag">Guerreiro</span>
+    <span class="char-preview-sub" id="charSub">Arma inicial: Espada</span>
+   </div>
+  </div>
+  <div class="menu-body">
+   <div class="menu-group">
+    <h3>Personagem</h3>
+    <div class="row" id="chs"></div>
+   </div>
+   <div class="menu-group">
+    <h3>Melhorias</h3>
+    <div class="row" id="ups"></div>
+   </div>
+   <button class="go" id="start">Jogar</button>
+  </div>
+  <div class="controls-hint">
+   <span><b>WASD</b> Mover</span>
+   <span><b>Mouse</b> Olhar</span>
+   <span><b>Q</b> XP</span>
+   <span><b>ESC</b> Pausa</span>
+  </div>
+ </div>
+ <div class="stage-title" aria-label="Survivor 3D">
+  <h1 class="hero-title">SURVIVOR<span>3D</span></h1>
+  <div class="hero-rule"></div>
+  <span class="hero-sub">Sobrevivência Low-Poly</span>
+ </div>
+</div>
+<div id="lvl" class="ov" hidden>
+ <div class="pn">
+  <div class="modal-head">
+   <div class="modal-badge"><span class="ico" id="lvlBadgeIco"></span></div>
+   <h2>Subiu de Nível</h2>
+  </div>
+  <p>Escolha uma melhoria para fortalecer sua jornada</p>
+  <div class="row" id="opts"></div>
+ </div>
+</div>
+<div id="pause" class="ov" hidden>
+ <div class="pn">
+  <div class="modal-head">
+   <div class="modal-badge"><span class="ico" id="pauseBadgeIco"></span></div>
+   <h2>Jogo Pausado</h2>
+  </div>
+  <p>A neblina aguarda na floresta.</p>
+  <div class="row">
+   <button class="go" id="resume">Continuar</button>
+   <button class="btn-sec" id="pauseMenu">Voltar ao menu</button>
+  </div>
+  <p class="modal-hint">Pressione ESC para continuar</p>
+ </div>
+</div>
+<div id="over" class="ov" hidden>
+ <div class="pn">
+  <div class="modal-head">
+   <div class="modal-badge"><span class="ico" id="overBadgeIco"></span></div>
+   <h2>Você Morreu</h2>
+  </div>
+  <p>Sua jornada chegou ao fim</p>
+  <div class="st" id="stats"></div>
+  <button class="go" id="again">Voltar ao menu</button>
+ </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module" src="src/main.js"></script></body></html>
